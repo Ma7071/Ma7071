@@ -1,0 +1,137 @@
+void DifFluxX(Field *q, float *dF,int j)
+{
+    q=q+j*N;
+    float w[4];
+    float e1[3],e2[3],e3[3];
+    float a,H,v,u;
+    float alpha1,alpha2,alpha3;
+    float lambda1,lambda2,lambda3,lambda4;
+    //initialize w
+    w[0]=(q)->q;
+    w[1]=(q)->q * (q)->v;
+    w[2]=(q)->q * (q)->u;
+    w[3]=(q)->e;
+    
+    
+    // calculate roe averages
+    
+    // calculate velocity average
+    float num1,num2,num3,num4;
+    num1=pow((q)->q,0.5) * (q)->v;
+    num2=pow((q+1)->q,0.5) * (q+1)->v;
+    num3=pow((q)->q,0.5)+pow((q+1)->q,0.5);
+    v=(num1+num2)/num3;
+    
+    num1=pow((q)->q,0.5) * (q)->u;
+    num2=pow((q+1)->q,0.5) * (q+1)->u;
+    num3=pow((q)->q,0.5)+pow((q+1)->q,0.5);
+    u=(num1+num2)/num3;
+    
+    // calculate h
+    float hl,hr;
+    hl=((q)->e + (q)->p)/((q)->q);
+    hr=((q+1)->e + (q+1)->p)/((q+1)->q);
+    
+    // calculate H average
+    num1=pow((q)->q,0.5) * hl;
+    num2=pow((q+1)->q,0.5) * hr;
+    num3=pow((q)->q,0.5)+pow((q+1)->q,0.5);
+    H=(num1+num2)/num3;
+    
+    // calculate a average
+    num1=H-0.5*pow(u,2)*pow(v,2);
+    num2=gamma-1;
+    num3=num1*num2;
+    num4=pow(num3,0.5);
+    a=num4;
+    
+    // calculate alphas
+    
+    // calculate alpha2
+    num1=(gamma-1)/(pow(a,2));
+    num2=(H-pow(u,2)-pow(v,2))*( (q+1)->q-(q)->q);
+    num3= u*(( ((q+1)->q*(q+1)->u) - ((q)->q*(q)->u)))+v*(( ((q+1)->q*(q+1)->v) - ((q)->q*(q)->v)));
+    num4=(q+1)->e-(q)->e;
+    alpha2=num1*(num2+num3-num4);
+    
+    // calculate alpha1
+    num1=1/(2*a);
+    num2=(u+v+a)*( (q+1)->q-(q)->q);
+    num3= ((q+1)->q*(q+1)->v) - ((q)->q*(q)->v)+ ((q+1)->q*(q+1)->u) - ((q)->q*(q)->u);
+    num4=a*alpha2;
+    alpha1=num1*(num2-num3- num4);
+    
+    // calculate alpha3
+    num1=(q+1)->q-(q)->q;
+    num2=alpha1+alpha2;
+    alpha3=num1-num2;
+    
+    // calculate lambdas
+    lambda1=w[1]/w[0];
+    lambda2=lambda1;
+    num1=sqrt( pow(w[0],4)*(2*w[3]*w[0]-w[1]*w[1]-w[2]*w[2]));
+    num1=num1*2.64575;
+    num2=5*w[0]*w[0]*w[1];
+    num3=pow(w[0],3);
+    lambda3=0.2*(num2-num1);
+    lambda3=lambda3/num3;
+    lambda4=0.2*(num2+num1);
+    lambda4=lambda4/num3;
+    
+    // calculate eigenvectors
+    
+    //calculate e1
+    e1[0]=1;
+    e1[1]=u-a;
+    e1[2]=H-(u*a);
+    
+    //calculate e2
+    e2[0]=1;
+    e2[1]=u;
+    e2[2]=0.5*pow(u,2);
+    
+    //calculate e3
+    e3[0]=1;
+    e3[1]=u+a;
+    e3[2]=H+(u*a);
+    
+    //calculate dF[0]
+    num1=alpha1*lambda1*e1[0];
+    num2=alpha2*lambda2*e2[0];
+    num3=alpha3*lambda3*e3[0];
+    dF[0]=num1+num2+num3;
+    float r=dF[0]/((q+1)->p-(q)->p);
+    dF[0]= superbee(r)*dF[0];
+    
+    
+    //calculate dF[1]
+    num1=alpha1*lambda1*e1[1];
+    num2=alpha2*lambda2*e2[1];
+    num3=alpha3*lambda3*e3[1];
+    dF[1]=num1+num2+num3;
+    r=dF[1]/((q+1)->p-(q)->p);
+    dF[1]= superbee(r)*dF[1];
+    
+    
+    //calculate dF[2]
+    num1=alpha1*lambda1*e1[2];
+    num2=alpha2*lambda2*e2[2];
+    num3=alpha3*lambda3*e3[2];
+    dF[2]=num1+num2+num3;
+    r=dF[2]/((q+1)->p-(q)->p);
+    dF[2]= superbee(r)*dF[2];
+    
+    
+    for(int r=0;r<3;r++)
+    {
+        if(isinf(dF[r]) || isnan(dF[r]))
+        {
+            *error=*(error)+1;
+            for(int f=0;f<3;f++)
+            {
+                dF[f]=0;
+            }
+        }
+    }
+    
+}
