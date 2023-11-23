@@ -100,7 +100,7 @@ void DifFluxX(Field *q, float *dF,int j)
     num2=alpha2*lambda2*e2[0];
     num3=alpha3*lambda3*e3[0];
     dF[0]=num1+num2+num3;
-    float r=dF[0]/((q+1)->p-(q)->p);
+    float r=dF[0]/((q+1)->q-(q)->q);
     dF[0]= superbee(r)*dF[0];
     
     
@@ -109,7 +109,7 @@ void DifFluxX(Field *q, float *dF,int j)
     num2=alpha2*lambda2*e2[1];
     num3=alpha3*lambda3*e3[1];
     dF[1]=num1+num2+num3;
-    r=dF[1]/((q+1)->p-(q)->p);
+    r=dF[1]/((q+1)->v-(q)->v);
     dF[1]= superbee(r)*dF[1];
     
     
@@ -118,7 +118,7 @@ void DifFluxX(Field *q, float *dF,int j)
     num2=alpha2*lambda2*e2[2];
     num3=alpha3*lambda3*e3[2];
     dF[2]=num1+num2+num3;
-    r=dF[2]/((q+1)->p-(q)->p);
+    r=dF[2]/((q+1)->e-(q)->e);
     dF[2]= superbee(r)*dF[2];
     
     
