@@ -1,3 +1,5 @@
+
+
 void DifFluxX(Field *q, float *dF,int j)
 {
     q=q+j*N;
